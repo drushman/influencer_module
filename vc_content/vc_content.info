@@ -1,0 +1,4 @@
+name = Vietcoop Content
+description = Display some customize content elements .
+core = 7.x
+package = Vietcoop

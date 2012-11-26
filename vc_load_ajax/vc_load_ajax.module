@@ -1,0 +1,128 @@
+<?php
+
+
+/**
+ * Implements hook_init().
+ */
+function vc_load_ajax_init() {
+  drupal_add_js('misc/jquery.form.js');
+  drupal_add_library('system', 'drupal.ajax');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function vc_load_ajax_menu() {
+  $items['church-life/load/%/%/%'] = array(
+    'page callback' => 'vc_load_ajax_ajax_church_life_register_form',
+    'page arguments' => array(2,3,4),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['form-influencer/load/%/%/%'] = array(
+    'page callback' => 'vc_load_ajax_ajax_influencer_webform_form',
+    'page arguments' => array(2,3,4),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  // A menu callback is required when using ajax outside of the Form API.
+  $items['webfom/load/%/%'] = array(
+    'page callback' => 'vc_load_ajax_form_response',
+    'page arguments' => array(2,3),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+/**
+ * Menu callback webfom/loaddrush
+ */
+function vc_load_ajax_form_response($delta, $id) {
+  $commands = array();
+  $webform = webform_block_view ( $delta = $delta ); 
+  $commands[] = ajax_command_replace("#{$id}", "<div id={$id}>" . $webform['content'] . '</div>');
+  $page = array(
+    '#type' => 'ajax',
+    '#commands' => $commands
+  );
+  ajax_deliver($page);
+}
+
+
+// path is: /church-life/load/client-block-4/2/ajax-form-2
+// $nid = arg(3);
+function vc_load_ajax_ajax_church_life_register_form($delta, $nid, $id) {
+    $commands = array();
+    $node = node_load($nid);
+    if (!isset($langcode)) {
+      $langcode = $GLOBALS['language_content']->language;
+    }
+    $build = node_view($node, 'full', $langcode);
+    $video = drupal_render($build['field_video']);
+    $webform = webform_block_view($delta = $delta);
+//    kpr($webform); exit;
+    $video_html = "<div class=video>{$video}</div>";
+    $webform_html = "<div class=" . "webform-{$id}>{$webform['content']}</div>";
+    $commands[] = ajax_command_replace("#{$id}", "<div id={$id} class=ajax-webform-form>" . $video_html . $webform_html . '</div>');
+    $page = array(
+      '#type' => 'ajax',
+      '#commands' => $commands
+    );
+    ajax_deliver($page);
+}
+
+/**
+ * Repose content for influencer/load/%/%
+ * @param type $delta
+ * @param type $nid
+ * @param type $id
+ */
+function vc_load_ajax_ajax_influencer_webform_form($delta ,$nid ,$id) {
+    $commands = array();
+    $webform = webform_block_view($delta = $delta);
+    $webform_html = "<div class=" . "webform-{$id}>{$webform['content']}</div>";
+    $commands[] = ajax_command_replace("#{$id}", "<div id={$id}>" . $webform_html . '</div>');
+    $page = array(
+      '#type' => 'ajax',
+      '#commands' => $commands
+    );
+    ajax_deliver($page);
+}
+
+
+function vc_load_ajax_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'webform_client_form_4') {  
+    if (strpos(request_path(), 'church-life/load/client-block') !== FALSE) {
+      $nid = arg(3);
+      $components = $form['submitted'];
+      foreach ($components as $key => $component) {
+        if (!is_array($component)) {
+          continue;
+        }
+        $class = str_replace('_', '-', $key);
+        $form['submitted'][$key]['#attributes'] = array('class' => array($class, 'webform-textfield-type'));
+      }
+      $form['submitted']['nid']['#value'] = $nid;
+    }
+  }
+  if (strpos(request_path(), 'form-influencer/load/client-block') !== FALSE) {
+    $nid = arg(3); 
+    $delta = arg(2);
+    $deltas = explode('-', $delta);
+    $webform_id = 'webform_client_form_' . end($deltas);
+    if ($form_id == $webform_id) {
+      if (isset($form['submitted']['nid'])) {
+        $form['submitted']['nid']['#value'] = $nid;
+      } 
+    }
+  }
+  if (strpos($form_id, 'webform_client_form_') !== FALSE) {
+    $form['link'] = array(
+            '#markup' => '<div class=container-minimise><a class=minimise>Minimise</a></div>',
+            '#weight' => 99
+    );
+  }
+}

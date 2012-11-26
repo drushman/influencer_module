@@ -1,0 +1,286 @@
+<?php
+
+/**
+ * Implements hook_permission()
+ */
+function vc_admin_permission() {
+  return array(
+    'administer vietcoop dashboard' => array(
+      'title' => t('Administer vietcoop dashboard'),
+      'description' => t('Allows users complete control Vietcoop dashboard.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu()
+ */ 
+function vc_admin_menu() {
+  $items = array();
+  
+  $items['vc/dashboard'] = array(
+    'title' => 'Dashboard',
+    'description' => 'Site SEO admin page', 
+    'page callback' => 'vc_admin_dashboard_form', 
+    'access callback' => 'user_access',
+    'access arguments' => array('administer vietcoop dashboard'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['vc/contents'] = array(
+    'title' => 'Content',
+    'description' => 'Content admin page',        
+    'page callback' => 'vc_admin_content_form',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer vietcoop dashboard'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['vc/site_settings'] = array(
+    'title' => 'Site settings',
+    'description' => 'Site settings admin page', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vc_admin_site_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer vietcoop dashboard'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}  
+
+/**
+ * Form for Site settings admin page.
+ */
+function vc_admin_site_settings_form($form, &$form_state) {
+  $form['site_information'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Site details'),
+  );
+  
+  $form['site_information']['site_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Site name'),
+    '#default_value' => variable_get('site_name', 'Drupal'),
+    '#required' => TRUE
+  );
+  
+  $form['site_information']['site_slogan'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Slogan'),
+    '#default_value' => variable_get('site_slogan', ''),
+    '#description' => t("How this is used depends on your site's theme."),
+  );
+  
+  $form['site_information']['site_mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#default_value' => variable_get('site_mail', ini_get('sendmail_from')),
+    '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
+    '#required' => TRUE,
+  );
+  
+  return system_settings_form($form);
+}
+
+/**
+ * Validates the submitted site-information form.
+ */
+function vc_admin_site_settings_form_validate($form, &$form_state) {
+  // Validate the e-mail address.
+  if ($error = user_validate_mail($form_state['values']['site_mail'])) {
+    form_set_error('site_mail', $error);
+  }
+}
+
+/**
+ * Form for SEO admin page.
+ */
+function vc_admin_dashboard_form() {
+  if (!variable_get('google_analytics_reports_oauth_token', FALSE)) {
+    drupal_set_message(t('You must <a href="!url">authorize</a> Drupal to use your Analytics account before you can view reports.', array('!url' => url('admin/config/system/google-analytics-reports'))), 'warning');
+    return ' ';
+  }
+
+  module_load_include('inc', 'google_analytics_reports','google_analytics_reports.pages');
+  $summary = array(
+    'conversion' => _vc_admin_google_analytics_reports_conversion(),
+    'loyalty' => _vc_admin_google_analytics_reports_loyalty(),
+    'visit_chart' => _google_analytics_reports_visits(),
+    'usage' => _google_analytics_reports_usage(),
+    'pages' => _vc_admin_google_analytics_reports_top_pages(),
+    'referrals' => _vc_admin_google_analytics_reports_top_referrals(),
+    'keywords' => _vc_admin_google_analytics_reports_top_keywords(),
+    //'facebook'  => vc_admin_facebook_like_count(),
+    'twitter' => vc_admin_twitter_follower_count(),
+  );
+  if (in_array(FALSE, $summary, TRUE)) {
+    $menu_item = menu_get_item();
+    if ($menu_item['href'] == 'admin/reports/google-analytics') {
+      drupal_set_message(_google_analytics_reports_error_message(), 'error');
+      return ' ';
+    }
+    else {
+
+    }
+    return '<p>' . _google_analytics_reports_error_message() . '</p>';
+  }
+  return theme('vc_admin_google_analytics_reports_summary', $summary);
+}
+
+/**
+ * Renders an img element with a chart of the number of site goal conversion.
+ */
+function _vc_admin_google_analytics_reports_conversion() {
+  $params = array(
+    'metrics' => array('ga:goalConversionRateAll'),
+    'start_date' => strtotime('-31 days'),
+    'end_date' => strtotime('-1 day'),
+  );
+  $feed = google_analytics_api_report_data($params);  
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->totals;
+}
+
+/**
+ * Renders an img element with a chart of the number of site visitor loyalty.
+ */
+function _vc_admin_google_analytics_reports_loyalty() {
+  $params = array(
+    'metrics' => array('ga:newVisits'),
+    'start_date' => strtotime('-31 days'),
+    'end_date' => strtotime('-1 day'),
+  );
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->totals;
+}
+
+/**
+ * Retrieves top pages.
+ */
+function _vc_admin_google_analytics_reports_top_pages() {
+  $params = array(
+    'metrics' => array('ga:pageviews'),
+    'dimensions' => array('ga:pageTitle', 'ga:hostname', 'ga:pagePath'),
+    'sort_metric' => array('-ga:pageviews'),
+    'start_date' => strtotime('-31 days'),
+    'end_date' => strtotime('-1 day'),
+    'sort' => '-ga:pageviews',
+    'max_results' => 4,
+  );
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->results;
+}
+
+/**
+ * Retrieves top referrals.
+ */
+function _vc_admin_google_analytics_reports_top_referrals($path = '') {
+  $params = array(
+    'metrics' => array('ga:visits'),
+    'dimensions' => array('ga:source', 'ga:medium'),
+    'sort_metric' => array('-ga:visits'),
+    'filters' => 'ga:medium==referral',
+    'start_date' => strtotime('-31 days'),
+    'end_date' => strtotime('-1 day'),
+    'max_results' => 4,
+  );
+  if ($path) {
+    $params['filters'] .= ';' . _google_analytics_reports_path_filter($path);
+  }
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->results;
+}
+
+/**
+ * Retrieves top keywords.
+ */
+function _vc_admin_google_analytics_reports_top_keywords($path = '') {
+  $params = array(
+    'metrics' => array('ga:visits'),
+    'dimensions' => array('ga:keyword'),
+    'sort_metric' => array('-ga:visits'),
+    'start_date' => strtotime('-31 days'),
+    'end_date' => strtotime('-1 day'),
+    'filters' => 'ga:keyword!=(not set)',
+    'max_results' => 4,
+  );
+  if ($path) {
+    $params['filters'] .= ';' . _google_analytics_reports_path_filter($path);
+  }
+  $feed = google_analytics_api_report_data($params);
+  if ($feed->error) {
+    return FALSE;
+  }
+  return $feed->results;
+}
+
+function vc_admin_facebook_like_count() {
+  require_once('facebook-php-sdk/src/facebook.php');
+  $facebook = new Facebook(array(  
+      'appId'  => '429990700387982',  
+      'secret' => '4c30f8c53e55ef064372ea1dca40c8d9',  
+      'cookie' => true,  
+  ));  
+  $result = $facebook->api(array(  
+      'method' => 'fql.query',  
+      'query' => 'select fan_count from page where page_id = 118549218197195 ;'  
+  ));  
+  return $result[0]['fan_count'];
+}
+
+function vc_admin_twitter_follower_count() {
+  $data = json_decode(file_get_contents('https://api.twitter.com/1/users/lookup.json?screen_name=influencersfilm'), true);
+  return $data[0]['followers_count'];
+}
+
+/**
+ * Form for Content admin page.
+ */
+function vc_admin_content_form() {
+  $fieldable_panel_panes = db_select('fieldable_panels_panes', 'fpp')
+    ->fields('fpp', array('title', 'fpid'))
+    ->orderBy('title', 'asc')
+    ->execute();    
+  if ($fieldable_panel_panes) {
+    foreach ($fieldable_panel_panes as $key => $pane) {
+      $content_type_list[] = '<span>Page</span>'.l($pane->title, 'admin/structure/fieldable-panels-panes/view/'.$pane->fpid.'/edit', array('html' => TRUE, 'query' => array('destination' => 'vc/contents')));
+    }
+  }
+  
+  $types = node_type_get_types(); 
+  unset($types['feed']);
+  unset($types['feed_item']);
+  unset($types['panel']);
+  foreach ($types as $type) {
+    $content_type_list[] = '<span>Content list</span>'.l($type->name, 'vc/contents/'.$type->type, array('html' => TRUE, 'query' => array('destination' => 'vc/contents')));
+  }
+  
+  return theme('item_list', array('items' => $content_type_list, 'type' => 'ul', 'attributes' => array('class' => 'content_type_list')));
+}
+
+/**
+ * Implements hook_theme().
+ */
+function vc_admin_theme() {
+  return array(
+    'vc_admin_google_analytics_reports_summary' => array(
+      'variables' => array(
+        'summary' => NULL
+      ),  
+      'template' => 'vc_admin_google_analytics_reports_summary',
+      'file' => 'vc_admin_google_analytics_reports.theme.inc',
+    ),
+  );
+}

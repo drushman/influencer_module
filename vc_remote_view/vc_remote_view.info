@@ -1,0 +1,4 @@
+name = Vietcoop Remote View
+description = Display site site view.
+core = 7.x
+package = Vietcoop
