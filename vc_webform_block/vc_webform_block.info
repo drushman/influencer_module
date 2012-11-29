@@ -1,0 +1,7 @@
+name = "Vietcoop Webform Block"
+description = "Display webform in block by machine-name"
+package = "Vietcoop"
+core = 7.x
+
+dependencies[] = defaultcontent
+dependencies[] = webform

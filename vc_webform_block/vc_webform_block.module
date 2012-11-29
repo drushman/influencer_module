@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ *
+ */
+function vc_webform_block_block_info() {
+  $blocks['vc_webform_block_join_group'] = array(
+    'info' => t('Block Webfom Join Group'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_concierge'] = array(
+    'info' => t('Block Webfom Concierge'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_concierge_form'] = array(
+    'info' => t('Block Webfom Concierge Form'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_giving_time'] = array(
+    'info' => t('Block Webfom Giving Time'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_prayer_fasting'] = array(
+    'info' => t('Block Webfom Prayer Fasting'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_bring'] = array(
+    'info' => t('Block Webfom Bring'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_internship'] = array(
+    'info' => t('Block Webfom Internship'),
+    'status' => FALSE,
+  );
+  
+  $blocks['vc_webform_block_go_trip'] = array(
+    'info' => t('Block Webfom Go Trip'),
+    'status' => FALSE,
+  );
+ return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function vc_webform_block_block_view($delta = '') {
+  
+  if ($delta == 'vc_webform_block_join_group') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('join_group_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_concierge') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('concierge_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_concierge_form') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('concierge_form_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_giving_time') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('giving_time_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_prayer_fasting') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('prayer_fasting_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_bring') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('bring_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_internship') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('internship_webform');
+  }
+  
+  if ($delta == 'vc_webform_block_go_trip') {
+    $block['subject'] = '<none>';
+    $block['content'] = vc_webform_block_machine_name('go_trip_webform');
+  }
+  return $block;
+}
+
+
+function vc_webform_block_machine_name($name) {
+  $select = db_select('defaultcontent', 'd')
+    ->fields('d', array('nid'))
+    ->condition('name', $name)
+    ->execute()
+    ->fetchAll();
+  $nid = $select[0]->nid;
+  $block = module_invoke('webform', 'block_view', 'client-block-' . $nid);
+  return render($block['content']); 
+}
