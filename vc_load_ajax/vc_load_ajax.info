@@ -1,5 +1,6 @@
 name = Vietcoop load Ajax
 description = Handler to load webform register base on node
 core = 7.x
-
 package = "Vietcoop"
+
+dependencies[] = vc_webform_block

@@ -3,8 +3,12 @@ description = Display site admin dashboard.
 core = 7.x
 package = Vietcoop
 
+dependencies[] = googleanalytics
 dependencies[] = google_analytics_reports
 dependencies[] = fieldable_panels_panes
 dependencies[] = themekey
 dependencies[] = themekey_ui
 dependencies[] = themekey_compat
+dependencies[] = oauth_common
+dependencies[] = views
+dependencies[] = views_bulk_operations

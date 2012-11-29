@@ -46,8 +46,76 @@ function vc_admin_menu() {
     'type' => MENU_CALLBACK,
   );
   
+  $items['admin/vc/settings'] = array(
+    'title' => 'Vietcoop Dashboard Settings',
+    'description' => 'Settings Vietcoop Dashboard page', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vc_admin_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer vietcoop dashboard'),
+    'type' => MENU_CALLBACK,
+  );
+  
   return $items;
+}
+
+/**
+ * Implementation of hook_admin_paths()
+ */
+function vc_admin_admin_paths() {
+  $paths = array(
+    'admin/vc/settings' => TRUE, 
+  );
+  return $paths;
 }  
+
+/**
+ * Form for Site settings admin page.
+ */
+function vc_admin_settings_form($form, &$form_state) {
+  $form['vietcoop_dashboard_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Vietcoop Dashboard Settings'),
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Facebook Report Settings'),
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_fanpage_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook fanpage ID'),
+    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: 118549218197195"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_app_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook App ID'),
+    '#default_value' => variable_get('vc_dashboard_facebook_app_id', 429990700387982),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: 429990700387982"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_app_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook App Secret'),
+    '#default_value' => variable_get('vc_dashboard_facebook_app_secret', '4c30f8c53e55ef064372ea1dca40c8d9'),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: '4c30f8c53e55ef064372ea1dca40c8d9'"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_twitter_page_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Twitter Page Name'),
+    '#default_value' => variable_get('vc_dashboard_twitter_page_name', 'influencersfilm'),
+    '#description' => t("Twitter Page Name to display follower count report. Ex: influencersfilm"),
+  );
+  
+  return system_settings_form($form);
+}
 
 /**
  * Form for Site settings admin page.
@@ -228,20 +296,24 @@ function _vc_admin_google_analytics_reports_top_keywords($path = '') {
 
 function vc_admin_facebook_like_count() {
   require_once('facebook-php-sdk/src/facebook.php');
+  $face_app_id = variable_get('vc_dashboard_facebook_app_id', 429990700387982);
+  $face_app_secret = variable_get('vc_dashboard_facebook_app_secret', '4c30f8c53e55ef064372ea1dca40c8d9');
+  $facebook_fanpage_id = variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195);
   $facebook = new Facebook(array(  
-      'appId'  => '429990700387982',  
-      'secret' => '4c30f8c53e55ef064372ea1dca40c8d9',  
+      'appId'  => $face_app_id,  
+      'secret' => $face_app_secret,  
       'cookie' => true,  
   ));  
   $result = $facebook->api(array(  
       'method' => 'fql.query',  
-      'query' => 'select fan_count from page where page_id = 118549218197195 ;'  
+      'query' => "select fan_count from page where page_id = {$facebook_fanpage_id};"  
   ));  
   return $result[0]['fan_count'];
 }
 
 function vc_admin_twitter_follower_count() {
-  $data = json_decode(file_get_contents('https://api.twitter.com/1/users/lookup.json?screen_name=influencersfilm'), true);
+  $twitter_page_name = variable_get('vc_dashboard_twitter_page_name', 'influencersfilm');
+  $data = json_decode(file_get_contents("https://api.twitter.com/1/users/lookup.json?screen_name={$twitter_page_name}"), true);
   return $data[0]['followers_count'];
 }
 
@@ -283,4 +355,41 @@ function vc_admin_theme() {
       'file' => 'vc_admin_google_analytics_reports.theme.inc',
     ),
   );
+}
+
+/**
+ * Implementation of hook_block_info().
+ */
+function vc_admin_block_info() {
+  $blocks['dashboard_user_tool'] = array(
+    'info' => t('Dashboard User tool Block'),
+  );
+  return $blocks;
+}
+ 
+/**
+ * Implementation of hook_block_view().
+ */
+function vc_admin_block_view($delta='') {
+  $block = array();
+  switch ($delta) {
+    case 'dashboard_user_tool':
+      $block['subject'] = t('Dashboard User tool Block');
+      $block['content'] = vc_admin_dashboard_user_tool_contents();
+      break;
+  }
+  return $block;
+}
+ 
+/**
+ * custom html block
+ * @return string
+ */
+function vc_admin_dashboard_user_tool_contents() {  
+  if (user_is_logged_in()) {
+    global $user;
+    return '<div class="welcome_text">Welcome, <a href=/user/'. $user->uid .'>'. $user->name . '</a></div><div class="account_text"><a href=/user/'. $user->uid .'/edit>Account Settings</a></div><div class="logout_text"><a href="/user/logout">Log out</a></div>';
+  } else {
+    return '';
+  }
 }

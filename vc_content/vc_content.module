@@ -15,9 +15,9 @@ function vc_content_views_api() {
  */ 
 function vc_content_menu() {
   $items = array(); 
-  $items['admin/config/system/campus_infomation'] = array(
-    'title' => 'Campus site infomation',
-    'description' => 'Campus site infomation admin page', 
+  $items['admin/config/system/campus_information'] = array(
+    'title' => 'Campus site information',
+    'description' => 'Campus site information admin page', 
     'page callback' => 'drupal_get_form',
     'page arguments' => array('vc_content_campus_info_form'),
     'access callback' => 'user_access',
@@ -33,39 +33,62 @@ function vc_content_menu() {
  */
 function vc_content_admin_paths() {
   $paths = array(
-    'admin/config/system/campus_infomation' => TRUE,
+    'admin/config/system/campus_information' => TRUE,
   );
   
   return $paths;
 }
 
 /**
- * Form for Campus infomation admin page.
+ * Form for Campus information admin page.
  */
 function vc_content_campus_info_form($form, &$form_state) {
-  $form['campus_information'] = array(
+  $form['campus_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Campus site infomation'),
+    '#title' => t('Campus Settings'),
   );
   
-  $form['campus_information']['campus_name'] = array(
+  $form['campus_settings']['campus_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Choice campus type:'),
+    '#default_value' => variable_get('campus_type', 1),
+    '#options' => array(
+      'global' => t('Global site'),
+      'campus' => t('Campus site'),
+    ),
+  );
+  
+  $form['campus_settings']['campus_information'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Campus site information'),
+    '#states' => array(
+      'visible' => array(
+         ':input[name="campus_type"]' => array('value' => 'campus'),            
+      )               
+    ),
+  );
+  
+  $form['campus_settings']['campus_information']['campus_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Campus name'),
-    '#default_value' => variable_get('campus_name', 'Global Influencer Church'),
+    '#default_value' => variable_get('campus_name', 'Campus'),
     '#required' => TRUE
   );
   
-  $form['campus_information']['campus_address'] = array(
+  $form['campus_settings']['campus_information']['campus_address'] = array(
     '#type' => 'textfield',
     '#title' => t('Campus address'),
     '#default_value' => variable_get('campus_address', ''),
   );
   
-  $form['campus_information']['campus_country'] = array(
-    '#markup' => '<p><label>Campus Country </label>' . variable_get('campus_country', 'GLOBAL') . '</p>',
+  $form['campus_settings']['campus_information']['campus_country'] = array(
+  '#type' => 'textfield',
+  '#title' => t('Campus Country'),
+  '#default_value' => variable_get('campus_country', 'Australia'),
+  '#required' => TRUE,
   );
   
-  $form['campus_information']['campus_services'] = array(
+  $form['campus_settings']['campus_information']['campus_services'] = array(
     '#type' => 'textfield',
     '#title' => t('Campus services'),
     '#default_value' => variable_get('campus_services', ''),
@@ -73,6 +96,23 @@ function vc_content_campus_info_form($form, &$form_state) {
   );
   
   return system_settings_form($form);
+}
+
+function vc_content_campus_info_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  
+  if ($values['campus_type'] == 'campus') {
+    variable_set('campus_name', $values['campus_name']); 
+    variable_set('campus_country', $values['campus_country']);
+    if ($values['campus_address']) {
+      variable_set('campus_address', $values['campus_address']);
+    }
+    if ($values['campus_services']) {
+      variable_set('campus_services', $values['campus_services']); 
+    }
+  } else {
+    variable_set('campus_name', 'GLOBAL');
+  }  
 }
 
 /**
@@ -98,68 +138,56 @@ function vc_content_preprocess_node(&$vars) {
 }
 
 /**
-* Implements hook_node_view().
-*/
-function vc_content_node_view($node, $view_mode){  
-  if ($view_mode != 'custom_teaser') {
-    return;
-  }
-  if ($node->type == 'ministry') {  
-    // ... 
-  } 
-}
-
-/**
 * Implements hook_form_alter().
 */
-function vc_content_form_alter(&$form, $form_state, $form_id)  { 
-//  $form_state1 = array(
-//    'entity' => fieldable_panels_panes_create(array('bundle' => 'fieldable_panels_panes')),
-//    'add submit' => TRUE,
-//  );
-//
-//  // Default these to reusable.
-//  $form_state1['entity']->reusable = TRUE;
-//  
-//  
-//  $form1 = $form;//array();
-////  $form_state_1 = $form_state;//array();
-//  $entity = $form_state1['entity'];//fieldable_panels_panes_create(array('bundle' => 'fieldable_panels_panes', 'title'=> 'demo text123123', 'admin_title' => "demo1231", 'reusable' => TRUE, 'category' => 'demo'));
-//  field_attach_form('fieldable_panels_pane', $entity, $form1, $form_state1);
-//  
-////  $en = fieldable_panels_panes_create(array('bundle' => 'fieldable_panels_panes', 'title'=> 'demo text123123', 'admin_title' => "demo1231", 'reusable' => TRUE, 'category' => 'demo'));
-////  $en1 = fieldable_panels_panes_save($en);
-////  $entity = fieldable_panels_panes_load($en1->fpid);
-////  dsm($entity);
-////  dsm($form1);
-////  dsm($form_state1);
-//  //$en->attachLoad($en);
-//  $ew = entity_metadata_wrapper('fieldable_panels_pane', $entity);
-//  dsm($ew);
+function vc_content_form_alter(&$form, $form_state, $form_id)  {   
   if ($form_id == 'system_site_information_settings') {
-    $form['campus_information'] = array(
+    $form['campus_settings'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Campus site infomation'),
+      '#title' => t('Campus Settings'),
     );
     
-    $form['campus_information']['campus_name'] = array(
+    $form['campus_settings']['campus_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Choice campus type:'),
+      '#default_value' => variable_get('campus_type', 1),
+      '#options' => array(
+        'global' => t('Global site'),
+        'campus' => t('Campus site'),
+      ),
+    );
+    
+    $form['campus_settings']['campus_information'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Campus site information'),
+      '#states' => array(
+        'visible' => array(
+           ':input[name="campus_type"]' => array('value' => 'campus'),            
+        )
+      ),
+    );
+    
+    $form['campus_settings']['campus_information']['campus_name'] = array(
       '#type' => 'textfield',
       '#title' => t('Campus name'),
       '#default_value' => variable_get('campus_name', 'Global Influencer Church'),
       '#required' => TRUE
     );
     
-    $form['campus_information']['campus_address'] = array(
+    $form['campus_settings']['campus_information']['campus_address'] = array(
       '#type' => 'textfield',
       '#title' => t('Campus address'),
       '#default_value' => variable_get('campus_address', ''),
     );
     
-    $form['campus_information']['campus_country'] = array(
-      '#markup' => '<p><label>Campus Country </label>' . variable_get('campus_country', 'GLOBAL') . '</p>',
+    $form['campus_settings']['campus_information']['campus_country'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Campus Country'),
+    '#default_value' => variable_get('campus_country', 'Australia'),
+    '#required' => TRUE,
     );
     
-    $form['campus_information']['campus_services'] = array(
+    $form['campus_settings']['campus_information']['campus_services'] = array(
       '#type' => 'textfield',
       '#title' => t('Campus services'),
       '#default_value' => variable_get('campus_services', ''),
@@ -269,7 +297,7 @@ function vc_content_campus_services_contents() {
  * Display current campus name
  */
 function vc_content_current_campus_name_contents( $page = '') {  
-  $campus_name = variable_get('campus_name', 'Campus');
+  $campus_name = strtolower(variable_get('campus_name', 'Campus'));
   $content = '';
   switch ($page) {
     case 'team_page':

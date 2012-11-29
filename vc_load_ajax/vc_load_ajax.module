@@ -42,7 +42,9 @@ function vc_load_ajax_menu() {
  */
 function vc_load_ajax_form_response($delta, $id) {
   $commands = array();
-  $webform = webform_block_view ( $delta = $delta ); 
+  // Change to use vc_webform_block module (using webform machine-name)
+  //$webform = webform_block_view( $delta = $delta ); 
+  $webform = vc_webform_block_machine_name($delta);
   $commands[] = ajax_command_replace("#{$id}", "<div id={$id}>" . $webform['content'] . '</div>');
   $page = array(
     '#type' => 'ajax',
@@ -62,10 +64,12 @@ function vc_load_ajax_ajax_church_life_register_form($delta, $nid, $id) {
     }
     $build = node_view($node, 'full', $langcode);
     $video = drupal_render($build['field_video']);
-    $webform = webform_block_view($delta = $delta);
-//    kpr($webform); exit;
     $video_html = "<div class=video>{$video}</div>";
-    $webform_html = "<div class=" . "webform-{$id}>{$webform['content']}</div>";
+    // Change to use vc_webform_block module (using webform machine-name)
+    // $webform = webform_block_view($delta);
+    // $webform_html = "<div class=" . "webforms-{$id}>{$webform['content']}</div>";
+    $webform = vc_webform_block_machine_name($delta);    
+    $webform_html = "<div class=" . "webform-{$id}>{$webform}</div>";
     $commands[] = ajax_command_replace("#{$id}", "<div id={$id} class=ajax-webform-form>" . $video_html . $webform_html . '</div>');
     $page = array(
       '#type' => 'ajax',
@@ -82,7 +86,9 @@ function vc_load_ajax_ajax_church_life_register_form($delta, $nid, $id) {
  */
 function vc_load_ajax_ajax_influencer_webform_form($delta ,$nid ,$id) {
     $commands = array();
-    $webform = webform_block_view($delta = $delta);
+    // Change to use vc_webform_block module (using webform machine-name)
+    // $webform = webform_block_view($delta = $delta);
+    $webform = vc_webform_block_machine_name($delta);
     $webform_html = "<div class=" . "webform-{$id}>{$webform['content']}</div>";
     $commands[] = ajax_command_replace("#{$id}", "<div id={$id}>" . $webform_html . '</div>');
     $page = array(

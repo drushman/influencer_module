@@ -13,6 +13,14 @@ function vc_remote_view_menu() {
     'type' => MENU_CALLBACK,
   );
   
+  $items['vc/event/global_team'] = array(
+    'title' => 'Global team',
+    'description' => 'Get all global team', 
+    'page callback' => 'vc_remote_view_get_global_team_view', 
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
   return $items;
 }
 
@@ -21,12 +29,42 @@ function vc_remote_view_get_global_event_view() {
   drupal_json_output(views_embed_view('global_event', 'block'));
 }
 
+function vc_remote_view_get_global_team_view() {
+  // Output the view
+  drupal_json_output(views_embed_view('team_views', 'block_global_leadership'));
+}
+
+/**
+* Implements hook_form_alter().
+*/
+function vc_remote_view_form_alter(&$form, $form_state, $form_id)  { 
+  if ($form_id == 'system_site_information_settings') { 
+    if (variable_get('campus_type', 'campus') != 'global') {
+      $form['vc_remote_view_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Vietcoop Remote View Settings'),
+      );
+      
+      $form['vc_remote_view_settings']['global_campus_url'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Global Campus Site URL'),
+        '#description' => t('Global Campus Site URL for take views. Ex: "http://global_site_name.com".'),
+        '#default_value' => variable_get('global_campus_url', 'http://dev.influ.drupal.vc'),      
+        '#required' => TRUE
+      );
+    }
+  }
+}
+
 /**
  * Implementation of hook_block_info().
  */
 function vc_remote_view_block_info() {
   $blocks['global_event_block'] = array(
     'info' => t('Global event Block'),
+  );
+  $blocks['global_team_block'] = array(
+    'info' => t('Global team Block'),
   );
   return $blocks;
 }
@@ -38,8 +76,12 @@ function vc_remote_view_block_view($delta='') {
   $block = array();
   switch ($delta) {
     case 'global_event_block':
-      $block['subject'] = t('Global event Block');
-      $block['content'] = vc_remote_view_contents();
+      $block['subject'] = t('Global Events');
+      $block['content'] = vc_remote_view_global_event_contents();
+      break;
+    case 'global_team_block':
+      $block['subject'] = t('Global Leadership Team');
+      $block['content'] = vc_remote_view_global_team_contents();
       break;
   }
   return $block;
@@ -49,18 +91,38 @@ function vc_remote_view_block_view($delta='') {
  * custom html block
  * @return string
  */
-function vc_remote_view_contents() {  
-//  $cache = cache_get('vc_global_event_block', 'cache_block');
-//  // Return cache if possible.
-//  if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
-//    return $cache->data;
-//  } 
-//  else {    
-//    $request = drupal_http_request('http:dev.influ.drupal.vc/vc/event/global_events');
-//    $block_content = drupal_json_decode($request->data);
-//    cache_set('vc_global_event_block', $block_content, 'cache_block', time() + 108000);
-//    return $block_content;
-//  }
-  $request = drupal_http_request('http:dev.influ.drupal.vc/vc/event/global_events');
-    return drupal_json_decode($request->data);  
+function vc_remote_view_global_event_contents() {  
+  if (variable_get('campus_type', 'campus') != 'global') {
+    $cache = cache_get('vc_global_event_block', 'cache_block');
+    // Return cache if possible.
+    if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
+      return $cache->data;
+    }
+    else {    
+      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/global_events');
+      $block_content = drupal_json_decode($request->data);
+      cache_set('vc_global_event_block', $block_content, 'cache_block', time() + 108000);
+      return $block_content;
+    }    
+  } else {
+    return views_embed_view('global_event', 'block');
+  }
+}
+
+function vc_remote_view_global_team_contents() {
+  if (variable_get('campus_type', 'campus') != 'global') {
+    $cache = cache_get('vc_global_team_block', 'cache_block');
+    // Return cache if possible.
+    if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
+      return $cache->data;
+    } 
+    else { 
+      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/global_team');
+      $block_content = drupal_json_decode($request->data);
+      cache_set('vc_global_team_block', $block_content, 'cache_block', time() + 108000);
+      return $block_content;
+    }
+  } else {
+    return views_embed_view('team_views', 'block_global_leadership');
+  }
 }
