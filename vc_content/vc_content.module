@@ -51,7 +51,7 @@ function vc_content_campus_info_form($form, &$form_state) {
   $form['campus_settings']['campus_type'] = array(
     '#type' => 'radios',
     '#title' => t('Choice campus type:'),
-    '#default_value' => variable_get('campus_type', 1),
+    '#default_value' => variable_get('campus_type', 'campus'),
     '#options' => array(
       'global' => t('Global site'),
       'campus' => t('Campus site'),
