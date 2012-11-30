@@ -1,0 +1,5 @@
+name = Menu default content
+description = Create menu and menu link thougth menu_import
+dependencies[] = menu_import
+package = "Viet Coop"
+core = 7.x
