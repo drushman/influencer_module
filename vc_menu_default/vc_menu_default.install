@@ -38,19 +38,19 @@ function vc_menu_deafult_save_menu($name) {
 	
 	$option = array(
 			'create_content' => 0,
-			'link_to_content' => 1 ,
+			'link_to_content' => 0,
 			'remove_menu_items' => 1,
-			'node_type' => '' ,
-			'node_body' => '' ,
-			'node_author' => 1 ,
-			'node_status' => 0 ,
-			'node_alias' => 0 
+			'node_type' => '',
+			'node_body' => '',
+			'node_author' => 0,
+			'node_status' => 0,
+			'node_alias' => 0,
 	);
 	
 	module_load_include('inc', 'menu_import', 'includes/import');
 	
 	$menu = menu_import_parse_menu_from_file($file->uri, $name, $option );
-	watchdog('data','Values: %count' ,array('%count' => $menu));
+//	watchdog('data','Values: %count' ,array('%count' => $menu));
 	file_delete($file);
 	$result = menu_import_save_menu($menu, $option);
 	if (empty($result['failed'])) {
@@ -58,6 +58,6 @@ function vc_menu_deafult_save_menu($name) {
 	}
 	foreach ($result as $type => $value) {
 		$msg_type = $type == 'failed' ? 'error' : 'status';
-		watchdog($msg_type,'Values: %count' ,array('%count' => $value));
+//		watchdog($msg_type,'Values: %count' ,array('%count' => $value));
 	}
 }
