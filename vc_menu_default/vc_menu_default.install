@@ -1,0 +1,63 @@
+<?php
+
+
+/**
+ * Implements hook_install().
+ */
+function vc_menu_default_install() {
+  vc_menu_deafult_create_demo_menus_links();
+}
+
+/**
+ * Creates menu items.
+ */
+function vc_menu_deafult_create_demo_menus_links() {
+  $menus = array(
+      'main-menu',
+      'menu-footer-menu',
+      'menu-fresh-dashboard',
+      'menu-homepage-news-box',
+      'menu-influncer-campus',
+      'menu-new-influencer',
+      'menu-social-network-link',
+  );
+	foreach($menus as $key => $menu){
+		watchdog('menu', 'Add menu link %name', array('%name' => $menu));
+		vc_menu_deafult_save_menu($menu);
+	}
+}
+
+function vc_menu_deafult_save_menu($name) {
+	$file->uid = 1;
+	$file->uri = drupal_get_path('module', 'vc_menu_default') . "/include/{$name}.txt";
+	$file->filemime = file_get_mimetype($file->uri);
+	$file->status = 1;
+	$dest = file_default_scheme() . '://'.$name;
+	$file = file_copy($file, $dest);
+	$file = file_save($file);
+	
+	$option = array(
+			'create_content' => 0,
+			'link_to_content' => 1 ,
+			'remove_menu_items' => 1,
+			'node_type' => '' ,
+			'node_body' => '' ,
+			'node_author' => 1 ,
+			'node_status' => 0 ,
+			'node_alias' => 0 
+	);
+	
+	module_load_include('inc', 'menu_import', 'includes/import');
+	
+	$menu = menu_import_parse_menu_from_file($file->uri, $name, $option );
+	watchdog('data','Values: %count' ,array('%count' => $menu));
+	file_delete($file);
+	$result = menu_import_save_menu($menu, $option);
+	if (empty($result['failed'])) {
+		unset($result['failed']);
+	}
+	foreach ($result as $type => $value) {
+		$msg_type = $type == 'failed' ? 'error' : 'status';
+		watchdog($msg_type,'Values: %count' ,array('%count' => $value));
+	}
+}
