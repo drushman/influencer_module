@@ -246,12 +246,16 @@ function vc_content_block_info() {
     'info' => t('Current campus name Block'),
   );
   
-  $blocks['current_active_menu'] = array(
-    'info' => t('Content current active menu Block'),
+  $blocks['current_active_main_menu'] = array(
+    'info' => t('Current active Main menu Block'),
   );
    
-  $blocks['copyright_current_active_menu'] = array(
-    'info' => t('Copyright current active menu Block'),
+  $blocks['current_active_copyright_menu'] = array(
+    'info' => t('Current active Site copyright menu Block'),
+  );
+  
+  $blocks['current_active_influencer_menu'] = array(
+    'info' => t('Current active New influencer menu Block'),
   );
   
   return $blocks;
@@ -287,14 +291,19 @@ function vc_content_block_view($delta='') {
       $block['subject'] = t('Current Campus Name Block');
       $block['content'] = vc_content_current_campus_name_contents('current_campus_menu');
       break;
-    case 'current_active_menu':
-      $block['subject'] = t('Content Current Active Menu Block');
+    case 'current_active_main_menu':
+      $block['subject'] = t('Current Active Main Menu Block');
       $menus = menu_tree('main-menu');
       $block['content'] = drupal_render(vc_content_get_current_active_menu_tree($menus));
       break;
-    case 'copyright_current_active_menu':
-      $block['subject'] = t('Site Copyright Current Active Menu Block');
+    case 'current_active_copyright_menu':
+      $block['subject'] = t('Current Active Site Copyright Menu Block');
       $menus = menu_tree('menu-site-copyright');
+      $block['content'] = drupal_render(vc_content_get_current_active_menu_tree($menus));
+      break;
+    case 'current_active_influencer_menu':
+      $block['subject'] = t('Current Active New Influencer Menu Block');
+      $menus = menu_tree('menu-new-influencer');
       $block['content'] = drupal_render(vc_content_get_current_active_menu_tree($menus));
       break;
   }
