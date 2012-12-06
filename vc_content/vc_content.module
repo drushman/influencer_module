@@ -152,8 +152,7 @@ function vc_content_node_view($node, $view_mode, $langcode) {
 * Implements hook_ctools_render_alter().
 */
 function vc_content_ctools_render_alter(&$info, &$page, &$context) {
-  //dsm($context);
-//  if($context['subtask']->name == 'concierge_page') {
+//  if($context['subtask']['name'] == 'concierge_page') {
 //    menu_tree_set_path('main-menu', 'concierge');
 //  }
 }
@@ -258,6 +257,10 @@ function vc_content_block_info() {
     'info' => t('Current active New influencer menu Block'),
   );
   
+  $blocks['current_active_footer_menu'] = array(
+    'info' => t('Current active Footer menu Block'),
+  );
+  
   return $blocks;
 }
  
@@ -304,6 +307,11 @@ function vc_content_block_view($delta='') {
     case 'current_active_influencer_menu':
       $block['subject'] = t('Current Active New Influencer Menu Block');
       $menus = menu_tree('menu-new-influencer');
+      $block['content'] = drupal_render(vc_content_get_current_active_menu_tree($menus));
+      break;
+    case 'current_active_footer_menu':
+      $block['subject'] = t('Current Active Footer Menu Block');
+      $menus = menu_tree('menu-footer-menu');
       $block['content'] = drupal_render(vc_content_get_current_active_menu_tree($menus));
       break;
   }
@@ -374,6 +382,7 @@ function vc_content_get_current_active_menu_tree($tree) {
   foreach ($tree as $menu) {
     if ($menu['#original_link']['in_active_trail']) {
       if ($menu['#below']) {
+        
         $r = vc_content_get_current_active_menu_tree($menu['#below']);
         if ($r==0) {
           return $menu['#below']; 
