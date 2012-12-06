@@ -20,6 +20,7 @@ function vc_menu_deafult_create_demo_menus_links() {
       'menu-influncer-campus',
       'menu-new-influencer',
       'menu-social-network-link',
+      'menu-site-copyright',
   );
 	foreach($menus as $key => $menu){
 		watchdog('menu', 'Add menu link %name', array('%name' => $menu));
