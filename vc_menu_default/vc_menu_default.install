@@ -76,8 +76,8 @@ function vc_menu_default_create_demo_menus() {
 function vc_menu_deafult_create_demo_menus_links() {
   $menus = array(
       'main-menu',
-      'menu-footer-menu',
-      'menu-fresh-dashboard',
+      'menu-footer-menu',   
+      'menu-fresh-dashboard',   
       'menu-homepage-news-box',
       'menu-influncer-campus',
       'menu-new-influencer',

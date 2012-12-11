@@ -46,7 +46,7 @@ function vc_admin_menu() {
     'type' => MENU_CALLBACK,
   );
   
-  $items['admin/vc/settings'] = array(
+  $items['admin/config/system/vc_dashboard_settings'] = array(
     'title' => 'Vietcoop Dashboard Settings',
     'description' => 'Settings Vietcoop Dashboard page', 
     'page callback' => 'drupal_get_form',
@@ -86,7 +86,7 @@ function vc_admin_settings_form($form, &$form_state) {
   $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_fanpage_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Facebook fanpage ID'),
-    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195),
+    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', '118549218197195'),
     '#description' => t("Facebook fanpage ID to display like count report. Ex: 118549218197195"),
     '#required' => TRUE
   );
@@ -94,7 +94,7 @@ function vc_admin_settings_form($form, &$form_state) {
   $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_app_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Facebook App ID'),
-    '#default_value' => variable_get('vc_dashboard_facebook_app_id', 429990700387982),
+    '#default_value' => variable_get('vc_dashboard_facebook_app_id', '429990700387982'),
     '#description' => t("Facebook fanpage ID to display like count report. Ex: 429990700387982"),
     '#required' => TRUE
   );
@@ -179,7 +179,7 @@ function vc_admin_dashboard_form() {
     'pages' => _vc_admin_google_analytics_reports_top_pages(),
     'referrals' => _vc_admin_google_analytics_reports_top_referrals(),
     'keywords' => _vc_admin_google_analytics_reports_top_keywords(),
-    //'facebook'  => vc_admin_facebook_like_count(),
+    'facebook'  => vc_admin_facebook_like_count(),
     'twitter' => vc_admin_twitter_follower_count(),
   );
   if (in_array(FALSE, $summary, TRUE)) {
@@ -295,20 +295,14 @@ function _vc_admin_google_analytics_reports_top_keywords($path = '') {
 }
 
 function vc_admin_facebook_like_count() {
-  require_once('facebook-php-sdk/src/facebook.php');
-  $face_app_id = variable_get('vc_dashboard_facebook_app_id', 429990700387982);
-  $face_app_secret = variable_get('vc_dashboard_facebook_app_secret', '4c30f8c53e55ef064372ea1dca40c8d9');
-  $facebook_fanpage_id = variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195);
-  $facebook = new Facebook(array(  
-      'appId'  => $face_app_id,  
-      'secret' => $face_app_secret,  
-      'cookie' => true,  
-  ));  
-  $result = $facebook->api(array(  
-      'method' => 'fql.query',  
-      'query' => "select fan_count from page where page_id = {$facebook_fanpage_id};"  
-  ));  
-  return $result[0]['fan_count'];
+  $request = drupal_http_request( 'https://graph.facebook.com/'.variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195));
+  $data = drupal_json_decode($request->data);
+  if ($data['error']) {
+    drupal_set_message(t('Error: '.$data['error']['message']), 'error');
+    return;
+  } else {
+    return $data['likes'];
+  }
 }
 
 function vc_admin_twitter_follower_count() {
