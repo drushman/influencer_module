@@ -21,6 +21,7 @@ TV|<front>||expanded
 -Highlights|highlights|
 -Streaming Help|streaming_help|
 Contact|<front>||expanded
+-Contact|contact|
 -Concierge|concierge|
 
 
