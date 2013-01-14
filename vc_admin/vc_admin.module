@@ -45,17 +45,7 @@ function vc_admin_menu() {
     'access arguments' => array('administer vietcoop dashboard'),
     'type' => MENU_CALLBACK,
   );
-  
-  $items['admin/config/system/vc_dashboard_settings'] = array(
-    'title' => 'Vietcoop Dashboard Settings',
-    'description' => 'Settings Vietcoop Dashboard page', 
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('vc_admin_settings_form'),
-    'access callback' => 'user_access',
-    'access arguments' => array('administer vietcoop dashboard'),
-    'type' => MENU_CALLBACK,
-  );
-  
+   
   return $items;
 }
 
@@ -68,54 +58,6 @@ function vc_admin_admin_paths() {
   );
   return $paths;
 }  
-
-/**
- * Form for Site settings admin page.
- */
-function vc_admin_settings_form($form, &$form_state) {
-  $form['vietcoop_dashboard_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Vietcoop Dashboard Settings'),
-  );
-  
-  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Facebook Report Settings'),
-  );
-  
-  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_fanpage_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Facebook fanpage ID'),
-    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', '118549218197195'),
-    '#description' => t("Facebook fanpage ID to display like count report. Ex: 118549218197195"),
-    '#required' => TRUE
-  );
-  
-  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_app_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Facebook App ID'),
-    '#default_value' => variable_get('vc_dashboard_facebook_app_id', '429990700387982'),
-    '#description' => t("Facebook fanpage ID to display like count report. Ex: 429990700387982"),
-    '#required' => TRUE
-  );
-  
-  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook']['vc_dashboard_facebook_app_secret'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Facebook App Secret'),
-    '#default_value' => variable_get('vc_dashboard_facebook_app_secret', '4c30f8c53e55ef064372ea1dca40c8d9'),
-    '#description' => t("Facebook fanpage ID to display like count report. Ex: '4c30f8c53e55ef064372ea1dca40c8d9'"),
-    '#required' => TRUE
-  );
-  
-  $form['vietcoop_dashboard_settings']['vc_dashboard_twitter_page_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Twitter Page Name'),
-    '#default_value' => variable_get('vc_dashboard_twitter_page_name', 'influencersfilm'),
-    '#description' => t("Twitter Page Name to display follower count report. Ex: influencersfilm"),
-  );
-  
-  return system_settings_form($form);
-}
 
 /**
  * Form for Site settings admin page.
@@ -146,6 +88,42 @@ function vc_admin_site_settings_form($form, &$form_state) {
     '#default_value' => variable_get('site_mail', ini_get('sendmail_from')),
     '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
     '#required' => TRUE,
+  );
+  
+  $form['vietcoop_dashboard_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Dashboard Report Settings'),
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook_fanpage_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook fanpage ID'),
+    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: 118549218197195"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook_app_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook App ID'),
+    '#default_value' => variable_get('vc_dashboard_facebook_app_id', '429990700387982'),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: 429990700387982"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_facebook_app_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook App Secret'),
+    '#default_value' => variable_get('vc_dashboard_facebook_app_secret', '4c30f8c53e55ef064372ea1dca40c8d9'),
+    '#description' => t("Facebook fanpage ID to display like count report. Ex: '4c30f8c53e55ef064372ea1dca40c8d9'"),
+    '#required' => TRUE
+  );
+  
+  $form['vietcoop_dashboard_settings']['vc_dashboard_twitter_page_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Twitter Page Name'),
+    '#default_value' => variable_get('vc_dashboard_twitter_page_name', 'influencersfilm'),
+    '#description' => t("Twitter Page Name to display follower count report. Ex: influencersfilm"),
   );
   
   return system_settings_form($form);
