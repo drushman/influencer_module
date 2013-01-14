@@ -98,7 +98,7 @@ function vc_admin_site_settings_form($form, &$form_state) {
   $form['vietcoop_dashboard_settings']['vc_dashboard_facebook_fanpage_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Facebook fanpage ID'),
-    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195),
+    '#default_value' => variable_get('vc_dashboard_facebook_fanpage_id', "118549218197195"),
     '#description' => t("Facebook fanpage ID to display like count report. Ex: 118549218197195"),
     '#required' => TRUE
   );
