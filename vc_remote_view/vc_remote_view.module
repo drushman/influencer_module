@@ -5,18 +5,47 @@
  */ 
 function vc_remote_view_menu() {
   $items = array();  
-  $items['vc/event/global_events'] = array(
+  $items['vc/event/global_event'] = array(
     'title' => 'Global events',
-    'description' => 'Get all global events', 
-    'page callback' => 'vc_remote_view_get_global_event_view', 
+    'description' => 'Get all global events',
+    'page callback' => 'vc_remote_view_get_global_view', 
+    'page arguments' => array('global_event', 'block', NULL),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   
   $items['vc/event/global_team'] = array(
     'title' => 'Global team',
-    'description' => 'Get all global team', 
-    'page callback' => 'vc_remote_view_get_global_team_view', 
+    'description' => 'Get all global team',
+    'page callback' => 'vc_remote_view_get_global_view', 
+    'page arguments' => array('team_views', 'block_global_leadership', NULL), 
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['vc/event/global_banner/%'] = array(
+    'title' => 'Global Banner',
+    'description' => 'Get all global banner', 
+    'page callback' => 'vc_remote_view_get_global_view', 
+    'page arguments' => array('influ_pages_header', 'block_1', 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['vc/event/global_disclaimer'] = array(
+    'title' => 'Global Disclaimer',
+    'description' => 'Get all global disclaimer page', 
+    'page callback' => 'vc_remote_view_get_global_view', 
+    'page arguments' => array('global_static_page', 'block_global_disclaimer', NULL),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['vc/event/global_privacy_policy'] = array(
+    'title' => 'Global Privacy Policy',
+    'description' => 'Get all global privacy policy page', 
+    'page callback' => 'vc_remote_view_get_global_view', 
+    'page arguments' => array('global_static_page', 'block_global_policy', NULL),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -24,20 +53,30 @@ function vc_remote_view_menu() {
   return $items;
 }
 
-function vc_remote_view_get_global_event_view() {
-  // Output the view
-  drupal_json_output(views_embed_view('global_event', 'block'));
-}
-
-function vc_remote_view_get_global_team_view() {
-  // Output the view
-  drupal_json_output(views_embed_view('team_views', 'block_global_leadership'));
+function vc_remote_view_get_global_view($views_id, $display_id, $page_id = NULL) {
+  // Output the views
+  switch ($views_id) {
+    case 'global_event':
+    case 'team_views':
+    case 'global_static_page':
+      drupal_json_output(views_embed_view($views_id, $display_id));
+      break;
+    case 'influ_pages_header':
+      if ($page_id == 'disclaimer') {
+        $admin_title = 'Disclaimer Page Header';
+      } elseif ($page_id == 'policy') {
+        $admin_title = 'Privacy Policy Page Header';
+      }
+      drupal_json_output(views_embed_view($views_id, $display_id, $admin_title));
+      break;
+  }
 }
 
 /**
 * Implements hook_form_alter().
 */
-function vc_remote_view_form_alter(&$form, $form_state, $form_id)  { 
+function vc_remote_view_form_alter(&$form, $form_state, $form_id)  {
+//    var_dump('Module in campus site :D');
   if ($form_id == 'system_site_information_settings') { 
     if (variable_get('campus_type', 'campus') != 'global') {
       $form['vc_remote_view_settings'] = array(
@@ -66,6 +105,18 @@ function vc_remote_view_block_info() {
   $blocks['global_team_block'] = array(
     'info' => t('Global team Block'),
   );
+  $blocks['global_disclaimer_banner'] = array(
+    'info' => t('Global Disclaimer page banner'),
+  );
+  $blocks['global_disclaimer_block'] = array(
+    'info' => t('Global Disclaimer Block'),
+  );
+  $blocks['global_policy_banner'] = array(
+    'info' => t('Global Privacy Policy page banner'),
+  );
+  $blocks['global_privacy_policy_block'] = array(
+    'info' => t('Global Privacy Policy Block'),
+  );
   return $blocks;
 }
  
@@ -74,14 +125,30 @@ function vc_remote_view_block_info() {
  */
 function vc_remote_view_block_view($delta='') {
   $block = array();
-  switch ($delta) {
+  switch ($delta) {      
     case 'global_event_block':
       $block['subject'] = t('Global Events');
-      $block['content'] = vc_remote_view_global_event_contents();
+      $block['content'] = vc_remote_view_global_contents('global_event', 'global_event', 'block');
       break;
     case 'global_team_block':
       $block['subject'] = t('Global Leadership Team');
-      $block['content'] = vc_remote_view_global_team_contents();
+      $block['content'] = vc_remote_view_global_contents('global_team', 'team_views', 'block_global_leadership');
+      break;
+    case 'global_disclaimer_banner':
+      $block['subject'] = t('Global Disclaimer Page Banner'); 
+      $block['content'] = vc_remote_view_global_banner('disclaimer');
+      break;
+    case 'global_policy_banner':
+      $block['subject'] = t('Global Privacy Policy Page Banner'); 
+      $block['content'] = vc_remote_view_global_banner('policy');
+      break;
+    case 'global_disclaimer_block':
+      $block['subject'] = t('Global Disclaimer Page');
+      $block['content'] = vc_remote_view_global_contents('global_disclaimer', 'global_static_page', 'block_global_disclaimer');
+      break;
+    case 'global_privacy_policy_block':
+      $block['subject'] = t('Global Privacy_Policy Page');
+      $block['content'] = vc_remote_view_global_contents('global_privacy_policy', 'global_static_page', 'block_global_policy');
       break;
   }
   return $block;
@@ -91,38 +158,43 @@ function vc_remote_view_block_view($delta='') {
  * custom html block
  * @return string
  */
-function vc_remote_view_global_event_contents() {  
+function vc_remote_view_global_contents($remove_content_id, $views_id = '', $display_id = '') {
   if (variable_get('campus_type', 'campus') != 'global') {
-    $cache = cache_get('vc_global_event_block', 'cache_block');
-    // Return cache if possible.
-    if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
-      return $cache->data;
-    }
-    else {    
-      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/global_events');
-      $block_content = drupal_json_decode($request->data);
-      cache_set('vc_global_event_block', $block_content, 'cache_block', time() + 108000);
-      return $block_content;
-    }    
-  } else {
-    return views_embed_view('global_event', 'block');
-  }
-}
-
-function vc_remote_view_global_team_contents() {
-  if (variable_get('campus_type', 'campus') != 'global') {
-    $cache = cache_get('vc_global_team_block', 'cache_block');
+    $cache = cache_get('vc_global_'.$remove_content_id, 'cache_block');
     // Return cache if possible.
     if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
       return $cache->data;
     } 
     else { 
-      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/global_team');
+      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/'.$remove_content_id);
       $block_content = drupal_json_decode($request->data);
-      cache_set('vc_global_team_block', $block_content, 'cache_block', time() + 108000);
+      cache_set('vc_global_'.$remove_content_id, $block_content, 'cache_block', time() + 108000);
       return $block_content;
     }
   } else {
-    return views_embed_view('team_views', 'block_global_leadership');
+    return views_embed_view($views_id, $display_id);
+  }
+}
+
+function vc_remote_view_global_banner($admin_title = '') {
+  if (variable_get('campus_type', 'campus') != 'global') {
+    $cache = cache_get('vc_global_banner_'.$admin_title, 'cache_block');
+    // Return cache if possible.
+    if ($cache && !empty($cache) && isset($cache->data) && !empty($cache->data)) {
+      return $cache->data;
+    } 
+    else { 
+      $request = drupal_http_request( variable_get( 'global_campus_url', 'http://dev.influ.drupal.vc').'/vc/event/global_banner/'.$admin_title);
+      $block_content = drupal_json_decode($request->data);
+      cache_set('vc_global_banner_'.$admin_title, $block_content, 'cache_block', time() + 108000);
+      return $block_content;
+    }
+  } else {
+    if ($admin_title == 'disclaimer') {
+      $admin_title = 'Disclaimer Page Header';
+    } elseif ($admin_title == 'policy') {
+      $admin_title = 'Privacy Policy Page Header';
+    }
+    return views_embed_view('influ_pages_header', 'block_1', $admin_title);
   }
 }
