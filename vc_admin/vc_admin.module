@@ -27,14 +27,37 @@ function vc_admin_menu() {
     'type' => MENU_CALLBACK,
   );
   
+//  $items['vc/contents'] = array(
+//    'title' => 'Content',
+//    'description' => 'Content admin page',        
+//    'page callback' => 'vc_admin_content_form',
+//    'access callback' => 'user_access',
+//    'access arguments' => array('administer vietcoop dashboard'),
+//    'type' => MENU_CALLBACK,
+//  );
+  
   $items['vc/contents'] = array(
     'title' => 'Content',
     'description' => 'Content admin page',        
-    'page callback' => 'vc_admin_content_form',
+    'page callback' => 'views_embed_view',
+    'page arguments' => array('vc_content_pages_admin', 'block'),
     'access callback' => 'user_access',
     'access arguments' => array('administer vietcoop dashboard'),
     'type' => MENU_CALLBACK,
   );
+  
+  $items['vc/contents/pages'] = array(
+    'title' => t('Pages'),
+    'type' => MENU_DEFAULT_LOCAL_TASK, 
+    'weight' => 1);
+  
+  $items['vc/contents/content_types'] = array(
+    'title' => t('Content Types'), 
+    'type' => MENU_LOCAL_TASK, 
+    'access callback' => 'user_access',
+    'access arguments' => array('administer vietcoop dashboard'), 
+    'page callback' => 'vc_admin_content_types_form',
+    'weight' => 2);
   
   $items['vc/site_settings'] = array(
     'title' => 'Site settings',
@@ -45,7 +68,7 @@ function vc_admin_menu() {
     'access arguments' => array('administer vietcoop dashboard'),
     'type' => MENU_CALLBACK,
   );
-   
+    
   return $items;
 }
 
@@ -88,6 +111,26 @@ function vc_admin_site_settings_form($form, &$form_state) {
     '#default_value' => variable_get('site_mail', ini_get('sendmail_from')),
     '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
     '#required' => TRUE,
+  );
+  
+  $form['ganalytics'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Google Analytics settings'),
+  );
+
+  $form['ganalytics']['googleanalytics_account'] = array(
+    '#title' => t('Web Property ID'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('googleanalytics_account', 'UA-'),
+    '#size' => 15,
+    '#maxlength' => 20,
+    '#required' => TRUE,
+    '#description' => t('This ID is unique to each site you want to track separately, and is in the form of UA-xxxxxxx-yy. To get a Web Property ID, <a href="@analytics">register your site with Google Analytics</a>, or if you already have registered your site, go to your Google Analytics Settings page to see the ID next to every site profile. <a href="@webpropertyid">Find more information in the documentation</a>.', array('@analytics' => 'http://www.google.com/analytics/', '@webpropertyid' => url('https://developers.google.com/analytics/resources/concepts/gaConceptsAccounts', array('fragment' => 'webProperty')))),
+  );
+  
+  $form['ganalytics']['google_analytics_report_link'] = array(
+    '#type' => 'item',
+    '#markup' => '<a href="/admin/config/system/google-analytics-reports?destination=vc/site_settings">Edit Google Analytics Reports Profiles</a>',
   );
   
   $form['vietcoop_dashboard_settings'] = array(
@@ -275,7 +318,7 @@ function _vc_admin_google_analytics_reports_top_keywords($path = '') {
 function vc_admin_facebook_like_count() {
   $request = drupal_http_request( 'https://graph.facebook.com/'.variable_get('vc_dashboard_facebook_fanpage_id', 118549218197195));
   $data = drupal_json_decode($request->data);
-  if ($data['error']) {
+  if (isset($data['error']) && $data['error']) {
     drupal_set_message(t('Error: '.$data['error']['message']), 'error');
     return;
   } else {
@@ -315,6 +358,14 @@ function vc_admin_content_form() {
 }
 
 /**
+ * Form for Content types admin page.
+ */
+function vc_admin_content_types_form() {
+  drupal_set_title('Content');
+  return views_embed_view('vc_content_nodetype_admin', 'block');
+}
+
+/**
  * Implements hook_theme().
  */
 function vc_admin_theme() {
@@ -336,6 +387,10 @@ function vc_admin_block_info() {
   $blocks['dashboard_user_tool'] = array(
     'info' => t('Dashboard User tool Block'),
   );
+  
+  $blocks['dashboard_menu_tool'] = array(
+    'info' => t('Dashboard Menu Block'),
+  );
   return $blocks;
 }
  
@@ -349,6 +404,10 @@ function vc_admin_block_view($delta='') {
       $block['subject'] = t('Dashboard User tool Block');
       $block['content'] = vc_admin_dashboard_user_tool_contents();
       break;
+    case 'dashboard_menu_tool':
+      $block['subject'] = t('');
+      $block['content'] = vc_admin_dashboard_menu_contents();
+      break;
   }
   return $block;
 }
@@ -360,8 +419,35 @@ function vc_admin_block_view($delta='') {
 function vc_admin_dashboard_user_tool_contents() {  
   if (user_is_logged_in()) {
     global $user;
-    return '<div class="welcome_text">Welcome, <a href=/user/'. $user->uid .'>'. $user->name . '</a></div><div class="account_text"><a href=/user/'. $user->uid .'/edit>Account Settings</a></div><div class="logout_text"><a href="/user/logout">Log out</a></div>';
+    return '<div class="welcome_text">Welcome, <a href=/user/'. $user->uid .'>'. $user->name . 
+      '</a></div><div class="account_text"><a href="/vc/dashboard">Dashboard</a></div><div class="account_text"><a href=/user/'. $user->uid . 
+      '/edit>Account Settings</a></div><div class="logout_text"><a href="/user/logout">Log out</a></div>';
   } else {
     return '';
   }
+}
+
+/**
+ * custom html block
+ * @return string
+ */
+function vc_admin_dashboard_menu_contents() {  
+  $content_active = false;
+  $current_path = current_path();
+  $content_link = array('vc/contents/', 'node/', 'admin/structure/fieldable-panels-panes/view/');
+  foreach ($content_link as $link) {
+    if (!(strpos($current_path, $link) === false)){      
+      $content_active = true;
+      break;
+    }
+  }
+  
+  $content .= '<div class="menu-dashboard">';
+  $content .= '<ul class="menu">';
+  $content .= '<li class="first leaf">'.l(t('Dashboard'), 'vc/dashboard').'</li>';
+  $content .= '<li class="leaf">'.l(t('Content'), 'vc/contents', array('attributes' => array('class' => array( $content_active ? 'active' : '')))).'</li>';
+  $content .= '<li class="last leaf">'.l(t('Site settings'), 'vc/site_settings').'</li>';
+  $content .= '</ul>';
+  $content .= '</div>';
+  return $content;
 }
