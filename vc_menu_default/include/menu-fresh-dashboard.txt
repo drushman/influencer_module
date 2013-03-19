@@ -1,3 +1,3 @@
-Dashboard|vc/dashboard|Site SEO admin page
-Content|vc/contents|Content admin page
-Site settings|vc/site_settings|Site settings admin page
+Dashboard {"url":"vc\/dashboard","description":"Site SEO admin page"}
+Content {"url":"vc\/contents","description":"Content admin page"}
+Site settings {"url":"vc\/site_settings","description":"Site settings admin page"}

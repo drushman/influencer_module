@@ -1,11 +1,11 @@
-Australia|<front>||expanded
--Paradise|<front>|
--Adelaide City|<front>|
--Adelaide North|<front>|
--Perth|<front>|
-USA|<front>||expanded
--Atlanta|<front>|
-Sourth Africa|<front>||expanded
--Coming soon|<front>|
-Papua New Guinea|<front>||expanded
--Coming soon|<front>|
+Australia {"url":"<front>","expanded":true}
+-Paradise {"url":"<front>"}
+-Adelaide City {"url":"<front>"}
+-Adelaide North {"url":"<front>"}
+-Perth {"url":"<front>"}
+USA {"url":"<front>","expanded":true}
+-Atlanta {"url":"<front>"}
+Sourth Africa {"url":"<front>","expanded":true}
+-Coming soon {"url":"<front>"}
+Papua New Guinea {"url":"<front>","expanded":true}
+-Coming soon {"url":"<front>"}

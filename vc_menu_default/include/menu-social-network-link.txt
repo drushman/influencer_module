@@ -1,4 +1,4 @@
-Facebook|<front>|
-Twitter|<front>|
-Vimeo|http://vimeo.com/|
-Rss|rss.xml|
+Facebook {"url":"<front>"}
+Twitter {"url":"<front>"}
+Vimeo {"url":"http:\/\/vimeo.com\/"}
+Rss {"url":"rss.xml"}

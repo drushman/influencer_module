@@ -1,24 +1,24 @@
-About|<front>||expanded
--Ps Ashley & Jane|about-ash-jane|
--Vision|vision|
--Team|team|
-Campuses|<front>||expanded
--Location|location|
--Services|services|
--Events|events|
-Connect|<front>||expanded
--Groups|group|
--Ministries|campus|
--Join a Group|join_a_group|
-Give|<front>||disabled
-Resources|<front>||expanded
--Podcasts|podcasts|
--Devotions Online|devotions_online|
--Store|store|
-TV|<front>||expanded
--Influencers Live|influencers_live||expanded
--Highlights|highlights|
--Streaming Help|streaming_help|
-Contact|<front>||expanded
--Concierge|concierge|
--Contact|contact|
+About {"url":"<front>","expanded":true}
+-Ps Ashley & Jane {"url":"about-ash-jane"}
+-Vision {"url":"vision"}
+-Team {"url":"team"}
+Campuses {"url":"<front>","expanded":true}
+-Location {"url":"location"}
+-Services {"url":"services"}
+-Events {"url":"events"}
+Connect {"url":"<front>","expanded":true}
+-Groups {"url":"group"}
+-Ministries {"url":"campus"}
+-Join a Group {"url":"join_a_group"}
+Give {"url":"<front>","hidden":true}
+Resources {"url":"<front>","expanded":true}
+-Podcasts {"url":"podcasts"}
+-Devotions Online {"url":"devotions_online"}
+-Store {"url":"store"}
+TV {"url":"<front>","expanded":true}
+-Influencers Live {"url":"influencers_live","expanded":true}
+-Highlights {"url":"highlights"}
+-Streaming Help {"url":"streaming_help"}
+Contact {"url":"<front>","expanded":true}
+-Concierge {"url":"concierge"}
+-Contact {"url":"contact"}

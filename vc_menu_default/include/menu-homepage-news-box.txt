@@ -1,4 +1,4 @@
-Paradise Album|store|
-Onling Giving|give|
-Paradise TV Online|devotions_online|
-Podcast Download|podcasts|
+Paradise Album {"url":"http:\/\/paradise.asn.au\/store\/products\/index.php?content=p&CatID=1016"}
+Onling Giving {"url":"give"}
+Paradise TV Online {"url":"influencers_live"}
+Podcast Download {"url":"podcasts"}

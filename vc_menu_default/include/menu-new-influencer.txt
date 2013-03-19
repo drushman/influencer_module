@@ -1,2 +1,2 @@
-I'm new|i-am-new|
-Be an Influencer|influencer|
+I'm new {"url":"i-am-new"}
+Be an Influencer {"url":"influencer"}
