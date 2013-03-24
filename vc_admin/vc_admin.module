@@ -451,3 +451,14 @@ function vc_admin_dashboard_menu_contents() {
   $content .= '</div>';
   return $content;
 }
+
+/**
+* Implements hook_form_alter().
+*/
+function vc_admin_form_fieldable_panels_panes_entity_edit_form_alter(&$form, $form_state, $form_id)  {
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['reusable']['#access'] = FALSE;
+    $form['revision']['#access'] = FALSE;
+  }
+}
