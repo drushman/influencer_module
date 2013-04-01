@@ -1,3 +1,4 @@
+Administration {"url":"admin", "weight":-43}
 -Dashboard {"url":"vc\/dashboard","description":"Site SEO admin page"}
 --Dashboard {"url":"vc\/dashboard","description":"Site SEO admin page"}
 --Contents {"url":"vc\/contents","description":"Content admin page"}
