@@ -536,4 +536,104 @@ function vc_admin_form_fieldable_panels_panes_entity_edit_form_alter(&$form, $fo
     $form['reusable']['#access'] = FALSE;
     $form['revision']['#access'] = FALSE;
   }
+  $form['#submit'][] = 'vc_admin_fieldable_panel_pane_submit';
 }
+
+function vc_admin_fieldable_panel_pane_submit($form, &$form_state) {
+  if ($page_title = $form_state['values']['field_page_title']['und'][0]['value']) {
+    switch ($form_state['entity']->admin_title) {
+      case 'About Ash & Jane Page Header':      
+        variable_set('page_title_about', $page_title);
+        break;
+        
+      case 'Be an Influencer Page Header':
+        variable_set('page_title_be_an_influencer', $page_title);
+        break;
+        
+      case 'College Page Header':
+        variable_set('page_title_college', $page_title);
+        break;
+        
+      case 'Concierge Page Header':
+        variable_set('page_title_concierge_page', $page_title);
+        break;
+        
+      case 'Contact Page Header':
+        variable_set('page_title_contact_page', $page_title);
+        break;
+        
+      case 'Devotions Online Page Header':
+        variable_set('page_title_devotions_online', $page_title);
+        break;
+        
+      case 'Disclaimer Page Header':
+        variable_set('page_title_disclaimer', $page_title);
+        break;
+        
+      case 'Events Page Header':
+        variable_set('page_title_events_listing', $page_title);
+        break;
+        
+      case 'Give Page Header':
+        variable_set('page_title_give', $page_title);
+        break;
+        
+      case 'Groups Page Header':
+        variable_set('page_title_group_page', $page_title);
+        break;
+        
+      case 'Highlights Page Header':
+        variable_set('page_title_highlights_page', $page_title);
+        break;
+        
+      case 'I\'m new Page Header':
+        variable_set('page_title_im_new', $page_title);
+        break;
+        
+      case 'Influencer Live Page Header':
+        variable_set('page_title_influencers_live', $page_title);
+        break;
+        
+      case 'Join a Group Page Header':
+        variable_set('page_title_join_a_group_page', $page_title);
+        break;
+        
+      case 'Location Page Header':
+        variable_set('page_title_location', $page_title);
+        break;
+        
+      case 'Ministry Page Header':
+        variable_set('page_title_campus_church_life_page', $page_title);
+        break;
+        
+      case 'Podcasts Page Header':
+        variable_set('page_title_podcasts', $page_title);
+        break;
+        
+      case 'Privacy Policy Page Header':
+        variable_set('page_title_privacy_policy_page', $page_title);
+        break;
+        
+      case 'Services Page Header':
+        variable_set('page_title_services', $page_title);
+        break;
+        
+      case 'Store Page Header':
+        variable_set('page_title_store', $page_title);
+        break;
+        
+      case 'Streaming Help Page Header':
+        variable_set('page_title_streaming_help_page', $page_title);
+        break;
+        
+      case 'Team Page Header':
+        variable_set('page_title_team_page', $page_title);
+        break;
+        
+      case 'Vision Page Header':
+        variable_set('page_title_vision', $page_title);
+        break;
+    }
+  }    
+}
+

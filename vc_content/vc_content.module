@@ -363,9 +363,9 @@ function vc_content_current_campus_name_contents( $page = '') {
       $content = '<div class="campus_team_page_title"><h2>'.ucfirst($campus_name).' Leadership Team</h2></div>';
       break;
     case 'event_page':
-      if (variable_get('campus_type', 'global') != 'global') {
+      // if (variable_get('campus_type', 'global') != 'global') {
         $content = '<div class="campus_event_page_title">'.ucfirst($campus_name).' Events</div>';
-      }
+      //}
       break;
     case 'ministry_page':
       $content = '<div class="campus_ministry_page_title">'.ucfirst($campus_name).' Church life</div>';
@@ -401,4 +401,15 @@ function vc_content_get_current_active_menu_tree($tree) {
   }
   
   return 0;
+}
+
+/**
+ * Implementation of hook_user_update()
+ */
+function vc_content_user_update(&$edit, $account, $category) {
+  if ($account->uid == 1 && variable_get('initial_features_export_setup', 0)) {
+    // Revert all features
+    features_revert();
+    cache_clear_all();
+  }
 }
