@@ -414,3 +414,30 @@ function vc_content_user_update(&$edit, $account, $category) {
     variable_set('initial_features_export_setup', 0);
   }
 }
+
+/**
+ * Implements hook_file_default_displays().
+ */
+function vc_content_file_default_displays() {
+  return array(
+    'video__default__media_youtube_video' => (object) array(
+      'api_version' => 1,
+      'name'  => 'video__default__media_youtube_video',
+      'status'  => TRUE,
+      'weight'  => 0,
+      'settings' => array(
+        'width'   => 666,
+        'height'  => 371,
+      ),
+    ),
+    'video__default__media_youtube_image' => (object) array(
+      'api_version' => 1,
+      'name'  => 'video__default__media_youtube_image',
+      'status'  => TRUE,
+      'weight'  => 0,
+      'settings' => array(
+        'image_style' => 'video_preview',
+      ),
+    ),
+  );
+}
