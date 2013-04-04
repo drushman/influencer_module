@@ -411,5 +411,6 @@ function vc_content_user_update(&$edit, $account, $category) {
     // Revert all features
     features_revert();
     cache_clear_all();
+    variable_set('initial_features_export_setup', 0);
   }
 }
